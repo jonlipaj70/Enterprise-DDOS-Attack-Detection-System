@@ -14,6 +14,10 @@ from pathlib import Path
 from typing import Optional
 
 from src.config.logging_config import get_logger
+from src.detection.cache_metadata import (
+    ensure_sklearn_cache_compatible,
+    sklearn_cache_metadata,
+)
 
 logger = get_logger(__name__)
 
@@ -73,9 +77,10 @@ class AutoencoderDetector:
         if self.model_path.exists() and self.scaler_path.exists() and self.metrics_path.exists():
             try:
                 logger.info("autoencoder_loading_cache")
+                metrics = joblib.load(self.metrics_path)
+                ensure_sklearn_cache_compatible(metrics, "autoencoder")
                 self._model = joblib.load(self.model_path)
                 self._scaler = joblib.load(self.scaler_path)
-                metrics = joblib.load(self.metrics_path)
 
                 self._error_threshold = metrics.get("error_threshold", 0.5)
                 self._error_mean = metrics.get("error_mean", 0.0)
@@ -205,6 +210,7 @@ class AutoencoderDetector:
                     "error_std": self._error_std,
                     "normal_p95": self._normal_p95,
                     "attack_p50": self._attack_p50,
+                    **sklearn_cache_metadata(),
                 },
                 self.metrics_path,
             )
@@ -215,6 +221,7 @@ class AutoencoderDetector:
                     "error_std": self._error_std,
                     "normal_p95": self._normal_p95,
                     "attack_p50": self._attack_p50,
+                    **sklearn_cache_metadata(),
                 }
             )
 

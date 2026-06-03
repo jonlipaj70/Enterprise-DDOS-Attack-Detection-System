@@ -16,6 +16,10 @@ import joblib
 from pathlib import Path
 
 from src.config.logging_config import get_logger
+from src.detection.cache_metadata import (
+    ensure_sklearn_cache_compatible,
+    sklearn_cache_metadata,
+)
 
 logger = get_logger(__name__)
 
@@ -53,9 +57,10 @@ class GradientBoostingDetector:
         if self.model_path.exists() and self.scaler_path.exists() and self.metrics_path.exists():
             try:
                 logger.info("gradient_boosting_loading_cache")
+                metrics = joblib.load(self.metrics_path)
+                ensure_sklearn_cache_compatible(metrics, "gradient_boosting")
                 self._model = joblib.load(self.model_path)
                 self._scaler = joblib.load(self.scaler_path)
-                metrics = joblib.load(self.metrics_path)
                 
                 self._accuracy = metrics.get('accuracy', 0.0)
                 self._f1 = metrics.get('f1', 0.0)
@@ -123,7 +128,8 @@ class GradientBoostingDetector:
             joblib.dump({
                 'accuracy': self._accuracy, 
                 'f1': self._f1, 
-                'feature_importances': self._feature_importances
+                'feature_importances': self._feature_importances,
+                **sklearn_cache_metadata(),
             }, self.metrics_path)
 
             logger.info(

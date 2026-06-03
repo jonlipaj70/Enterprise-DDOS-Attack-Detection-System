@@ -39,6 +39,17 @@ if not defined PYTHON_EXE (
     exit /b 1
 )
 
+if not exist "%PROJECT_ROOT%\.venv\Scripts\python.exe" (
+    echo [+] Krijoj virtual environment lokal .venv...
+    "%PYTHON_EXE%" -m venv "%PROJECT_ROOT%\.venv"
+    if errorlevel 1 (
+        echo [!] Krijimi i virtual environment deshtoi.
+        pause
+        exit /b 1
+    )
+)
+set "PYTHON_EXE=%PROJECT_ROOT%\.venv\Scripts\python.exe"
+
 echo [+] Python: %PYTHON_EXE%
 echo [+] Dashboard: %BASE_URL%
 echo.

@@ -7,8 +7,10 @@ FROM python:3.11-slim
 RUN useradd -m -r appuser && mkdir /app && chown appuser:appuser /app
 WORKDIR /app
 COPY --from=builder /install /usr/local
-COPY src/ ./src/
-COPY dashboard/ ./dashboard/
+COPY --chown=appuser:appuser src/ ./src/
+COPY --chown=appuser:appuser dashboard/ ./dashboard/
+COPY --chown=appuser:appuser data/ ./data/
+RUN mkdir -p /app/models /app/data/uploads/cicddos2019 && chown -R appuser:appuser /app/models /app/data
 USER appuser
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"

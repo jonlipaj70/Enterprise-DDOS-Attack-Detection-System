@@ -14,6 +14,10 @@ from pathlib import Path
 from typing import Optional
 
 from src.config.logging_config import get_logger
+from src.detection.cache_metadata import (
+    ensure_sklearn_cache_compatible,
+    sklearn_cache_metadata,
+)
 
 logger = get_logger(__name__)
 
@@ -63,9 +67,10 @@ class IsolationForestDetector:
         if self.model_path.exists() and self.scaler_path.exists() and self.metrics_path.exists():
             try:
                 logger.info("isolation_forest_loading_cache")
+                metrics = joblib.load(self.metrics_path)
+                ensure_sklearn_cache_compatible(metrics, "isolation_forest")
                 self._model = joblib.load(self.model_path)
                 self._scaler = joblib.load(self.scaler_path)
-                metrics = joblib.load(self.metrics_path)
 
                 self._score_offset = metrics.get("score_offset", 0.0)
                 self._score_scale = metrics.get("score_scale", 1.0)
@@ -151,6 +156,7 @@ class IsolationForestDetector:
                 {
                     "score_offset": self._score_offset,
                     "score_scale": self._score_scale,
+                    **sklearn_cache_metadata(),
                 },
                 self.metrics_path,
             )
@@ -158,6 +164,7 @@ class IsolationForestDetector:
                 {
                     "score_offset": self._score_offset,
                     "score_scale": self._score_scale,
+                    **sklearn_cache_metadata(),
                 }
             )
 

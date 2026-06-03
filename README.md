@@ -60,25 +60,44 @@ On Windows, the Enterprise sensor supports live packet capture through Wireshark
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/ddos-detection-system.git
-cd ddos-detection-system
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-.\venv\Scripts\activate   # Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Copy environment configuration
-cp .env.example .env
-
-# Run the system
-make run
+git clone https://github.com/jonlipaj70/Enterprise-DDOS-Attack-Detection-System.git
+cd Enterprise-DDOS-Attack-Detection-System
 ```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\run.ps1
+```
+
+Linux/macOS:
+
+```bash
+./scripts/setup.sh
+./scripts/run.sh
+```
+
+The setup scripts create `.venv`, install Python dependencies, copy `.env.example`
+to `.env` if needed, create runtime folders, and initialize the local SQLite
+database. The first server start trains cached synthetic detection models in
+`models/`; this can take 15-30 seconds on a fresh clone.
+
+To create an Admin account for protected API/dashboard actions:
+
+```powershell
+.\.venv\Scripts\python.exe -m src.cli.create_admin
+```
+
+Linux/macOS:
+
+```bash
+./.venv/bin/python -m src.cli.create_admin
+```
+
+Runtime files such as `.env`, `ddos_detection.db`, `models/`, logs, uploaded
+training datasets, and Python caches are intentionally not committed. They are
+created locally so every clone starts from a clean, safe baseline.
 
 ### Windows Live Sensor
 

@@ -14,6 +14,10 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from src.config.logging_config import get_logger
+from src.detection.cache_metadata import (
+    ensure_sklearn_cache_compatible,
+    sklearn_cache_metadata,
+)
 
 logger = get_logger(__name__)
 
@@ -219,8 +223,9 @@ class EnsembleModel:
         import joblib
         if self.stacking_path.exists() and self.stacking_metrics_path.exists():
             try:
-                self._stacking_model = joblib.load(self.stacking_path)
                 metrics = joblib.load(self.stacking_metrics_path)
+                ensure_sklearn_cache_compatible(metrics, "stacking")
+                self._stacking_model = joblib.load(self.stacking_path)
                 self._stacking_accuracy = metrics.get('accuracy', 0.0)
                 logger.info("stacking_meta_learner_loaded_from_cache", accuracy=self._stacking_accuracy)
                 return
@@ -258,7 +263,10 @@ class EnsembleModel:
             f1 = float(f1_score(y_test, y_pred, average="weighted"))
             
             joblib.dump(self._stacking_model, self.stacking_path)
-            joblib.dump({'accuracy': self._stacking_accuracy}, self.stacking_metrics_path)
+            joblib.dump(
+                {"accuracy": self._stacking_accuracy, **sklearn_cache_metadata()},
+                self.stacking_metrics_path,
+            )
 
             logger.info(
                 "stacking_meta_learner_trained",
