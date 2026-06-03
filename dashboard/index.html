@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Enterprise DDoS Attack Detection System — Real-time Security Operations Center Dashboard">
+    <title>Enterprise DDoS — Security Operations Center</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="js/vendor/chart.umd.min.js?v=20260527-enterprise-1"></script>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css?v=20260527-enterprise-1">
+    <link rel="stylesheet" href="css/components.css?v=20260527-enterprise-1">
+    <link rel="stylesheet" href="css/charts.css?v=20260527-enterprise-1">
+    <link rel="stylesheet" href="css/responsive.css?v=20260527-enterprise-1">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20260528-anomaly-metrics-1">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader-container">
+            <div class="shield-loader">
+                <svg viewBox="0 0 100 120" class="shield-svg">
+                    <path d="M50 5 L90 25 L90 60 Q90 95 50 115 Q10 95 10 60 L10 25 Z" fill="none" stroke="url(#shieldGradient)" stroke-width="3" class="shield-path"/>
+                    <defs>
+                        <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#06d6a0"/>
+                            <stop offset="100%" style="stop-color:#118ab2"/>
+                        </linearGradient>
+                    </defs>
+                    <text x="50" y="70" text-anchor="middle" fill="url(#shieldGradient)" font-size="30" font-weight="bold" font-family="Inter">⛊</text>
+                </svg>
+            </div>
+            <h2 class="loader-text">Initializing Enterprise DDoS</h2>
+            <p class="loader-subtext">Connecting to detection pipeline...</p>
+            <div class="loader-progress">
+                <div class="loader-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app hidden">
+        <aside class="enterprise-sidebar">
+            <a class="enterprise-brand" href="#overview" aria-label="Enterprise DDoS dashboard">
+                <span class="enterprise-mark" aria-hidden="true">
+                    <svg viewBox="0 0 56 64">
+                        <path d="M28 3 51 14v19C51 47 40 57 28 62 16 57 5 47 5 33V14Z"/>
+                        <path class="enterprise-mark-wave" d="M15 27c8-8 18-8 26 0M18 34c6-6 14-6 20 0M23 41c3-3 7-3 10 0"/>
+                        <circle cx="28" cy="48" r="2.8"/>
+                    </svg>
+                </span>
+                <span class="enterprise-brand-name">Enterprise DDoS</span>
+                <span class="enterprise-brand-product">Wireless Intelligence</span>
+            </a>
+
+            <div class="enterprise-nav-label">Monitor</div>
+            <nav class="enterprise-nav" aria-label="Dashboard sections">
+                <a class="active" href="#overview">Dashboard</a>
+                <a href="#alert-feed">Alerts</a>
+                <a href="#traffic-analysis">Traffic</a>
+                <a href="#model-training">Model Training</a>
+                <a href="#forensics-section">Forensics</a>
+                <a href="#packet-analysis">Telemetry</a>
+            </nav>
+
+            <div class="enterprise-sidebar-footer">
+                <div class="enterprise-system-status">
+                    <span id="sidebar-sensor-dot" class="enterprise-sensor-dot pending"></span>
+                    <div>
+                        <strong id="sidebar-sensor-state">Sensor starting</strong>
+                        <small id="sidebar-sensor-source">Capture state pending</small>
+                    </div>
+                </div>
+                <span class="enterprise-sidebar-note">Passive wireless intelligence</span>
+            </div>
+        </aside>
+
+        <div class="enterprise-workspace">
+        <!-- Top Navigation Bar -->
+        <nav id="navbar" class="navbar">
+            <div class="navbar-brand enterprise-route">
+                <span class="enterprise-route-slash">/</span>
+                <span class="enterprise-route-page">dashboard</span>
+                <span class="enterprise-route-chip">LIVE SOC</span>
+            </div>
+
+            <div class="navbar-status">
+                <div id="pipeline-status" class="status-indicator">
+                    <span class="status-dot pulse"></span>
+                    <span class="status-text">Pipeline Active</span>
+                </div>
+                <div id="connection-status" class="status-indicator">
+                    <span class="status-dot offline"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+            </div>
+
+            <div class="navbar-actions">
+                <div class="session-user">
+                    <span id="session-username">-</span>
+                    <span id="session-role" class="role-badge">-</span>
+                </div>
+                <div class="uptime-display">
+                    <span class="uptime-label">Uptime</span>
+                    <span id="uptime-value" class="uptime-value">0:00:00</span>
+                </div>
+                <button id="btn-fullscreen" class="nav-btn" title="Toggle Fullscreen">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                </button>
+                <button id="btn-logout" class="session-btn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <div id="operational-banner" class="operational-banner status-idle">
+            <span id="operational-banner-label">INITIALIZING CAPTURE</span>
+            <span id="operational-banner-detail">Waiting for a verified capture state.</span>
+        </div>
+        <div id="suppression-notice" class="suppression-notice hidden"></div>
+
+        <!-- Threat Alert Banner -->
+        <div id="threat-banner" class="threat-banner hidden">
+            <div class="threat-banner-content">
+                <div class="threat-header-row">
+                    <div class="threat-main">
+                        <span class="threat-icon">🚨</span>
+                        <span id="threat-text" class="threat-text">ACTIVE THREAT DETECTED</span>
+                        <span id="threat-type" class="threat-type"></span>
+                    </div>
+                    <button id="threat-dismiss" class="threat-dismiss">×</button>
+                </div>
+                <div class="expert-analysis hidden" id="expert-analysis">
+                    <div class="expert-chip">
+                        <span class="expert-label">MITRE ATT&CK:</span> <span id="expert-mitre"></span>
+                    </div>
+                    <div class="expert-chip">
+                        <span class="expert-label">OSI Layer:</span> <span id="expert-osi"></span>
+                    </div>
+                    <div class="expert-chip full-width">
+                        <span class="expert-label">Description:</span> <span id="expert-desc"></span>
+                    </div>
+                    <div class="expert-chip full-width mitigation">
+                        <span class="expert-label">SOC Mitigation:</span> <span id="expert-mitigation"></span>
+                    </div>
+                </div>
+                <div class="threat-details" id="threat-details">
+                    <!-- Dynamic signature features will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main id="overview" class="main-content">
+            <!-- KPI Cards Row -->
+            <section id="kpi-section" class="kpi-section">
+                <div class="kpi-card" id="kpi-pps">
+                    <div class="kpi-icon-wrap gradient-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-pps-value">0</span>
+                        <span class="kpi-label">Packets/sec</span>
+                    </div>
+                    <div class="kpi-sparkline"><canvas id="spark-pps"></canvas></div>
+                </div>
+
+                <div class="kpi-card" id="kpi-bps">
+                    <div class="kpi-icon-wrap gradient-blue">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-bps-value">0</span>
+                        <span class="kpi-label">Throughput</span>
+                    </div>
+                    <div class="kpi-sparkline"><canvas id="spark-bps"></canvas></div>
+                </div>
+
+                <div class="kpi-card" id="kpi-score">
+                    <div class="kpi-icon-wrap gradient-orange">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-score-value">0.00</span>
+                        <span class="kpi-label">Threat Score</span>
+                    </div>
+                    <div class="kpi-trend" id="kpi-score-trend">
+                        <span class="trend-arrow">—</span>
+                        <span class="trend-text">Stable</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" id="kpi-detections">
+                    <div class="kpi-icon-wrap gradient-red">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-detections-value">0</span>
+                        <span class="kpi-label">Attacks Detected</span>
+                    </div>
+                    <div class="kpi-badge" id="kpi-alerts-badge">
+                        <span id="active-alerts-count">0</span> active
+                    </div>
+                </div>
+
+                <div class="kpi-card" id="kpi-latency">
+                    <div class="kpi-icon-wrap gradient-purple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-latency-value">0</span>
+                        <span class="kpi-label">Detection Latency</span>
+                    </div>
+                    <div class="kpi-sublabel">ms</div>
+                </div>
+
+                <div class="kpi-card" id="kpi-processed">
+                    <div class="kpi-icon-wrap gradient-cyan">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-processed-value">0</span>
+                        <span class="kpi-label">Total Processed</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════ NEW: Ensemble Confidence + Network Stats ═══════ -->
+            <section class="stats-bar">
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">🎯</span>
+                    <span class="stat-pill-label">Ensemble Confidence</span>
+                    <span class="stat-pill-value" id="stat-confidence">—</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">🌐</span>
+                    <span class="stat-pill-label">Unique Sources</span>
+                    <span class="stat-pill-value" id="stat-unique-src">—</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">📊</span>
+                    <span class="stat-pill-label">SYN Ratio</span>
+                    <span class="stat-pill-value" id="stat-syn-ratio">—</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">🔄</span>
+                    <span class="stat-pill-label">SYN/ACK Ratio</span>
+                    <span class="stat-pill-value" id="stat-syn-ack">—</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">📦</span>
+                    <span class="stat-pill-label">Avg Pkt Size</span>
+                    <span class="stat-pill-value" id="stat-avg-size">—</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">🔀</span>
+                    <span class="stat-pill-label">IP Entropy</span>
+                    <span class="stat-pill-value" id="stat-entropy">—</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">⚡</span>
+                    <span class="stat-pill-label">Zero Payload</span>
+                    <span class="stat-pill-value" id="stat-zero-payload">—</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-icon">🪟</span>
+                    <span class="stat-pill-label">Small Window</span>
+                    <span class="stat-pill-value" id="stat-small-window">—</span>
+                </div>
+            </section>
+
+            <section id="model-training" class="training-section">
+                <div class="training-card">
+                    <div class="training-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10"/><path d="m7 7 5-5 5 5"/><path d="M5 14v6h14v-6"/></svg>
+                            Model Training / Tabular CSV or ZIP
+                        </h3>
+                        <span id="training-state" class="training-state idle">Idle</span>
+                    </div>
+                    <div class="training-grid">
+                        <div class="training-copy">
+                            <strong>Offline tabular classifier</strong>
+                            <p>Upload a labeled CSV, compressed CSV, or ZIP archive. The server detects the target column, samples each class, encodes numeric and categorical features, then trains the selected classifier.</p>
+                            <p>This is a shared model: any dashboard user can train it, and the latest completed job replaces the previous offline artifact.</p>
+                            <p class="training-warning">This trained artifact is not used by live packet-window detection until a compatible live flow extractor is added.</p>
+                        </div>
+                        <form id="training-form" class="training-form">
+                            <label for="training-csv">Dataset CSV or ZIP</label>
+                            <input id="training-csv" name="dataset" type="file" accept=".csv,.csv.gz,.csv.bz2,.csv.xz,.zip,text/csv,application/zip">
+                            <label for="training-target-column">Target column</label>
+                            <input id="training-target-column" name="target_column" type="text" placeholder="Auto detect">
+                            <label for="training-model-type">Model type</label>
+                            <select id="training-model-type" name="model_type">
+                                <option value="hist_gradient_boosting" selected>Hist Gradient Boosting</option>
+                                <option value="auto">Auto select best supported model</option>
+                                <option value="random_forest">Random Forest</option>
+                                <option value="extra_trees">Extra Trees</option>
+                                <option value="logistic_regression">Logistic Regression</option>
+                                <option value="linear_svm">Linear SVM</option>
+                                <option value="mlp">Neural Network (MLP)</option>
+                                <option value="gaussian_nb">Gaussian Naive Bayes</option>
+                                <option value="knn">K-Nearest Neighbors</option>
+                            </select>
+                            <button id="training-submit" class="training-submit" type="submit">Upload Dataset and Train</button>
+                            <span id="training-access" class="training-access">Available to all dashboard users.</span>
+                        </form>
+                        <div class="training-results" aria-live="polite">
+                            <p id="training-message" class="training-message">No offline model has been trained in this session.</p>
+                            <div class="training-metrics">
+                                <div><span>Model</span><strong id="training-model">-</strong></div>
+                                <div><span>Target</span><strong id="training-target">-</strong></div>
+                                <div><span>Rows</span><strong id="training-rows">-</strong></div>
+                                <div><span>Features</span><strong id="training-features">-</strong></div>
+                                <div><span>Accuracy</span><strong id="training-plain-accuracy">-</strong></div>
+                                <div><span>Balanced acc.</span><strong id="training-accuracy">-</strong></div>
+                                <div><span>F1 score</span><strong id="training-f1">-</strong></div>
+                            </div>
+                            <div id="training-algorithms" class="training-algorithms"></div>
+                        </div>
+                    </div>
+                    <div class="validation-panel">
+                        <div class="validation-header">
+                            <div>
+                                <h4>Algorithm Validation Metrics</h4>
+                                <p id="validation-note">Loading algorithm validation metrics...</p>
+                            </div>
+                            <span class="validation-badge">Accuracy / F1</span>
+                        </div>
+                        <div id="model-validation-grid" class="model-validation-grid" aria-live="polite">
+                            <p class="validation-loading">Loading saved validation metrics...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Row 1 -->
+            <section id="traffic-analysis" class="charts-section primary-analysis">
+                <div class="chart-card large">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            Live Traffic Monitor
+                        </h3>
+                        <div class="chart-legend" id="traffic-legend">
+                            <span class="legend-item"><span class="legend-dot" style="background:#56c7ff"></span>Packet Rate</span>
+                            <span class="legend-item"><span class="legend-dot" style="background:#a34cff"></span>Anomaly Score</span>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-traffic"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Detection Models
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-models"></canvas>
+                    </div>
+                    <div class="model-scores">
+                        <div class="model-score-item">
+                            <span class="model-name">Isolation Forest</span>
+                            <div class="model-bar"><div id="bar-if" class="model-bar-fill green" style="width:0%"></div></div>
+                            <span id="score-if" class="model-value">0.00</span>
+                        </div>
+                        <div class="model-score-item">
+                            <span class="model-name">Gradient Boosting</span>
+                            <div class="model-bar"><div id="bar-gb" class="model-bar-fill blue" style="width:0%"></div></div>
+                            <span id="score-gb" class="model-value">0.00</span>
+                        </div>
+                        <div class="model-score-item">
+                            <span class="model-name">Autoencoder</span>
+                            <div class="model-bar"><div id="bar-ae" class="model-bar-fill purple" style="width:0%"></div></div>
+                            <span id="score-ae" class="model-value">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Row 2 -->
+            <section id="secondary-analysis" class="charts-section secondary-analysis">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            Protocol Distribution
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-protocols"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Source IP Analysis
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-sources"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                            TCP Flags
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-flags"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════ NEW: Charts Row 3 — Byte Rate + Packet Size + Payload ═══════ -->
+            <section id="packet-analysis" class="charts-section packet-analysis">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+                            Bandwidth Monitor
+                        </h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-dot" style="background:#56c7ff"></span>Byte Rate</span>
+                            <span class="legend-item"><span class="legend-dot" style="background:#ff9f43"></span>UDP Ratio</span>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-bandwidth"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/></svg>
+                            Packet Size Distribution
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-pkt-size"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            TTL & Fragmentation
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-ttl-frag"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════ NEW: Attack Timeline ═══════ -->
+            <section id="attack-timeline-section" class="timeline-section">
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Attack Timeline
+                        </h3>
+                    </div>
+                    <div class="timeline-body" id="attack-timeline">
+                        <div class="timeline-empty">
+                            <span>⏳</span>
+                            <p>Monitoring — no attacks recorded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════ NEW: Network Forensics Panel ═══════ -->
+            <section id="forensics-section" class="forensics-section">
+                <div class="forensics-card">
+                    <div class="forensics-header">
+                        <h3 class="chart-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            Network Forensics — Real-Time Feature Snapshot
+                        </h3>
+                    </div>
+                    <div class="forensics-grid" id="forensics-grid">
+                        <div class="forensic-item">
+                            <span class="forensic-label">TCP Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-tcp" class="forensic-bar" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-tcp">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">UDP Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-udp" class="forensic-bar bar-blue" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-udp">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">ICMP Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-icmp" class="forensic-bar bar-purple" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-icmp">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">DNS Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-dns" class="forensic-bar bar-orange" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-dns">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">SYN Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-syn" class="forensic-bar bar-red" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-syn">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">ACK Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-ack" class="forensic-bar bar-cyan" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-ack">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">RST Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-rst" class="forensic-bar bar-red" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-rst">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">FIN Ratio</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-fin" class="forensic-bar bar-orange" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-fin">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">Zero Payload %</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-zero" class="forensic-bar bar-red" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-zero">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">Small Window %</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-swin" class="forensic-bar bar-orange" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-swin">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">Fragmentation %</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-frag" class="forensic-bar bar-purple" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-frag">—</span>
+                        </div>
+                        <div class="forensic-item">
+                            <span class="forensic-label">Large Packet %</span>
+                            <div class="forensic-bar-wrap"><div id="fbar-large" class="forensic-bar bar-blue" style="width:0%"></div></div>
+                            <span class="forensic-value" id="fval-large">—</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alerts Table -->
+            <section id="alert-feed" class="alerts-section">
+                <div class="alerts-card">
+                    <div class="alerts-header">
+                        <h3 class="alerts-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            Alert Feed
+                            <span id="alert-count-badge" class="alert-count-badge">0</span>
+                        </h3>
+                        <div class="alerts-filters">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="emergency">Emergency</button>
+                            <button class="filter-btn" data-filter="critical">Critical</button>
+                            <button class="filter-btn" data-filter="warning">Warning</button>
+                        </div>
+                    </div>
+                    <div class="alerts-body">
+                        <table class="alerts-table">
+                            <thead>
+                                <tr>
+                                    <th>Severity</th>
+                                    <th>Time</th>
+                                    <th>Attack Type</th>
+                                    <th>Score</th>
+                                    <th>Confidence</th>
+                                    <th>Packet Rate</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alerts-tbody">
+                                <tr class="no-alerts-row">
+                                    <td colspan="7">
+                                        <div class="no-alerts">
+                                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                            <p>No alerts — system monitoring normally</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span>Enterprise DDoS v2.0.0 — Detection System • 3 ML Models • 30+ Features • Real-time Pipeline</span>
+            <span id="footer-time"></span>
+        </footer>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js?v=20260527-enterprise-1"></script>
+    <script src="js/websocket.js?v=20260527-enterprise-1"></script>
+    <script src="js/charts.js?v=20260527-enterprise-1"></script>
+    <script src="js/alerts.js?v=20260527-enterprise-1"></script>
+    <script src="js/app.js?v=20260528-anomaly-metrics-1"></script>
+</body>
+</html>

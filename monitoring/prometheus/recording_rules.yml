@@ -1,0 +1,11 @@
+groups:
+  - name: ddos_recording_rules
+    rules:
+      - record: ddos:packet_rate:avg5m
+        expr: avg_over_time(ddos_packet_rate[5m])
+
+      - record: ddos:anomaly_score:max5m
+        expr: max_over_time(ddos_anomaly_score[5m])
+
+      - record: ddos:detection_latency:p95_5m
+        expr: histogram_quantile(0.95, rate(ddos_detection_latency_bucket[5m]))

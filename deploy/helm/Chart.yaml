@@ -1,0 +1,11 @@
+apiVersion: v2
+name: ddos-detection-system
+description: Enterprise DDoS Attack Detection System Helm Chart
+version: 1.0.0
+appVersion: "1.0.0"
+type: application
+keywords:
+  - ddos
+  - security
+  - detection
+  - machine-learning

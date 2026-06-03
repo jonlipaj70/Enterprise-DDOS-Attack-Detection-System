@@ -1,0 +1,51 @@
+/* ============================================================
+   DDoS Shield — Responsive Styles
+   ============================================================ */
+
+@media (max-width: 1400px) {
+    .kpi-section {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .charts-section {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .kpi-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .navbar-status {
+        display: none;
+    }
+
+    .main-content {
+        padding: var(--space-md);
+    }
+}
+
+@media (max-width: 600px) {
+    .kpi-section {
+        grid-template-columns: 1fr;
+    }
+
+    .kpi-sparkline {
+        display: none;
+    }
+
+    .alerts-filters {
+        flex-wrap: wrap;
+    }
+
+    .navbar {
+        padding: 0 var(--space-md);
+    }
+
+    .brand-subtitle {
+        display: none;
+    }
+}

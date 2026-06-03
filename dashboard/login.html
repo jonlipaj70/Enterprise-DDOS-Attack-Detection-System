@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise DDoS - Sign in</title>
+    <link rel="stylesheet" href="css/main.css?v=20260527-enterprise-1">
+    <link rel="stylesheet" href="css/login.css?v=20260527-enterprise-1">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20260527-enterprise-1">
+</head>
+<body class="login-page">
+    <main class="login-card">
+        <header class="login-header">
+            <div class="login-shield" aria-hidden="true"></div>
+            <div>
+                <h1>Enterprise DDoS</h1>
+                <p>Wireless intelligence control plane</p>
+            </div>
+        </header>
+        <div class="login-safety">
+            Response enforcement is gated and audited in Release 1.
+        </div>
+        <form id="login-form" class="login-form">
+            <label for="username">Username</label>
+            <input id="username" name="username" autocomplete="username" required>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <p id="login-error" class="login-error hidden" role="alert"></p>
+            <button type="submit">Sign in</button>
+        </form>
+    </main>
+    <script src="js/login.js?v=20260527-enterprise-1"></script>
+</body>
+</html>

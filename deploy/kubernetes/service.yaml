@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ddos-api
+  namespace: ddos-detection
+spec:
+  selector:
+    app: ddos-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+    - name: ws
+      port: 8001
+      targetPort: 8001
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ddos-dashboard
+  namespace: ddos-detection
+spec:
+  selector:
+    app: ddos-dashboard
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP

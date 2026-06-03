@@ -1,0 +1,38 @@
+replicaCount: 2
+
+image:
+  repository: ddos-detection/api
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilization: 70
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: ddos.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+config:
+  APP_ENV: production
+  LOG_LEVEL: INFO
+  METRICS_ENABLED: "true"

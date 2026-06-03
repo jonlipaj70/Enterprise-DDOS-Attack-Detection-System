@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ddos-detection
+  labels:
+    app.kubernetes.io/name: ddos-detection-system
+    app.kubernetes.io/part-of: security

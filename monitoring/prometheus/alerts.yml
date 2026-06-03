@@ -1,0 +1,27 @@
+groups:
+  - name: ddos_detection_alerts
+    rules:
+      - alert: HighPacketRate
+        expr: ddos_packet_rate > 50000
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High packet rate detected"
+          description: "Packet rate is {{ $value }} pps"
+
+      - alert: HighAnomalyScore
+        expr: ddos_anomaly_score > 0.8
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "High anomaly score detected"
+
+      - alert: DetectionLatencyHigh
+        expr: ddos_detection_latency_ms > 200
+        for: 60s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Detection latency exceeds SLA target"

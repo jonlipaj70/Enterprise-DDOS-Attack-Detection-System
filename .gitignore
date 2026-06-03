@@ -1,0 +1,81 @@
+# ─── Python ─────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+.eggs/
+*.whl
+
+# ─── Virtual Environments ───────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ─── IDE ────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ─── Environment ────────────────────────────────────────────
+.env
+.env.local
+.env.production
+
+# ─── Testing ────────────────────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.tox/
+
+# ─── Models ─────────────────────────────────────────────────
+models/*.pkl
+models/*.pth
+models/*.onnx
+models/*.joblib
+models/*.json
+models/cicddos_flow_classifier.joblib
+models/cicddos_flow_classifier.json
+!models/.gitkeep
+
+# ─── Logs ───────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── Database ───────────────────────────────────────────────
+*.db
+*.sqlite3
+
+# ─── OS Files ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ─── Docker ─────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ─── Terraform ──────────────────────────────────────────────
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+
+# ─── Spark ──────────────────────────────────────────────────
+spark-checkpoints/
+spark-warehouse/
+
+# Uploaded training datasets
+data/uploads/
+
+# ─── Node (for dashboard tooling) ───────────────────────────
+node_modules/

@@ -1,0 +1,84 @@
+/* ============================================================
+   DDoS Shield — Chart & Visualization Styles
+   ============================================================ */
+
+.charts-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-md);
+}
+
+.charts-section:nth-of-type(2) {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.chart-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--transition-normal);
+}
+
+.chart-card:hover {
+    border-color: var(--border-active);
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chart-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.chart-title svg {
+    color: var(--accent-green);
+    opacity: 0.8;
+}
+
+.chart-legend {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.chart-body {
+    padding: var(--space-md);
+    height: 220px;
+    position: relative;
+}
+
+.chart-body canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Chart card sizes */
+.chart-card.large .chart-body {
+    height: 260px;
+}
